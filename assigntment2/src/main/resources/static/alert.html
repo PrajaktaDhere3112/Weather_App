@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Alerts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            height: auto;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        #alerts, #dailyWeatherSummary {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .summary, .alert-item {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #e9ecef; /* Light gray background */
+        }
+        .alert-item {
+            background-color: #ffe6e6; /* Light red background for alerts */
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="alerts">
+        <h2>Weather Alerts</h2>
+        <div id="alertsContent">
+            <p>Loading alerts...</p>
+        </div>
+    </div>
+
+    <!-- Section for Daily Weather Summaries -->
+   
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Function to fetch alerts for a specific city
+        function fetchAlerts(city) {
+            axios.get(`http://localhost:8080/alerts/${city}`)
+                .then(response => {
+                    displayAlerts(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching alerts:', error);
+                });
+        }
+
+        // Function to display alerts on the webpage
+      function displayAlerts(alerts, city) {
+            const alertsDiv = document.getElementById('alertsContent');
+            if (alerts.length === 0) {
+                alertsDiv.innerHTML += `<div class="alert-item"><p>No alerts for ${city}.</p></div>`;
+                return;
+            }
+            alerts.forEach(alert => {
+                alertsDiv.innerHTML += `
+                    <div class="alert-item">
+                        <strong>${alert.city}</strong><br>
+                        ${alert.dateTime}: ${alert.message}
+                    </div>
+                `;
+            });
+        }
+
+        // Call the fetchAlerts function for multiple cities
+        window.onload = function() {
+            const cities = ['Delhi', 'Chennai', 'Bangalore', 'Hyderabad']; // List of cities to fetch alerts for
+            cities.forEach(city => {
+                fetchAlerts(city); // Fetch alerts for each city
+            });
+        };
+    </script>
+</body>
+</html>

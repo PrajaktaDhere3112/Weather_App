@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Monitoring System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            height: auto;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .cityWeather {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #e9ecef; /* Light gray background for weather data */
+        }
+        #summaryButton {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none; /* Remove underline */
+            font-size: 16px;
+        }
+        #summaryButton:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js" crossorigin></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Weather Monitoring System</h1>
+    
+    <form id="weatherForm">
+        <input type="submit" value="Fetch Weather" style="margin-right: 10px;">
+        <a id="summaryButton" href="summary.html">View Summary</a> 
+    </form>
+    <div id="result"></div>
+
+    <script>
+        // Fetch weather data for all cities when the form is submitted
+        document.getElementById('weatherForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+            fetchWeatherDataForAllCities();
+        });
+
+        // Function to fetch weather data for all cities
+        function fetchWeatherDataForAllCities() {
+            const url = `http://localhost:8080/weather/all`; // Your backend endpoint for all cities
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayWeatherData(data);
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+                });
+        }
+
+        // Display the fetched weather data
+        function displayWeatherData(data) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<h2>Weather Data</h2>`; // Title for the weather data
+            
+            data.forEach(cityData => {
+                const timestamp = cityData.dt;
+                const date = new Date(timestamp * 1000); // Convert from seconds to milliseconds
+                const formattedDate = date.toLocaleString(); // Format as human-readable date
+                
+                resultDiv.innerHTML += `
+                    <div class="cityWeather">
+                        <h3>Weather Data for ${cityData.name}</h3>
+                        <p><strong>Temperature:</strong> ${cityData.main.temp} °C</p>
+                        <p><strong>Feels Like:</strong> ${cityData.main.feels_like} °C</p>
+                        <p><strong>Humidity:</strong> ${cityData.main.humidity} %</p> <!-- Added humidity -->
+                        <p><strong>Wind Speed:</strong> ${cityData.wind.speed} m/s</p> <!-- Added wind speed -->
+                        <p><strong>Condition:</strong> ${cityData.weather[0].main}</p>
+                        <p><strong>Updated Date:</strong> ${formattedDate}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Set an interval to fetch weather data every 5 seconds
+        setInterval(fetchWeatherDataForAllCities, 5000); // 5000 milliseconds = 5 seconds
+    </script>
+</body>
+</html>

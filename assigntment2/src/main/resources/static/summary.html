@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Weather Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            height: auto;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        #buttonContainer {
+            display: flex;
+            justify-content: center; /* Center the buttons */
+            margin-bottom: 20px; /* Space below the buttons */
+        }
+        #summaryButton {
+            padding: 8px 12px; /* Reduced button size */
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none; /* Remove underline */
+            font-size: 14px; /* Slightly smaller font size */
+            margin: 0 5px; /* Spacing between buttons */
+        }
+        #summaryButton:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+        #dailyWeatherSummary {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .summary {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #e9ecef; /* Light gray background for summaries */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Daily Weather Summaries</h1>
+    
+    <div id="buttonContainer">
+        <a id="summaryButton" href="alert.html">View Alert</a>
+        <a id="summaryButton" href="graph.html">View Graph</a> 
+    </div>
+    
+    <div id="dailyWeatherSummary"></div>
+
+    <script>
+        let lastSummaryData = {}; // Store last fetched summary data as an object
+
+        // Fetch daily weather summary when the page loads
+        window.onload = function() {
+            fetchDailyWeatherSummary();
+        };
+
+        // Fetch daily weather summary
+        function fetchDailyWeatherSummary() {
+            axios.get(`http://localhost:8080/summary`) // Adjust the endpoint as needed
+                .then(response => {
+                    const newSummaryData = response.data.reduce((acc, summary) => {
+                        acc[summary.city] = summary; // Use city as a key for easy access
+                        return acc;
+                    }, {});
+
+                    // Update only if data has changed
+                    if (JSON.stringify(newSummaryData) !== JSON.stringify(lastSummaryData)) {
+                        lastSummaryData = newSummaryData; // Update last summary data
+                        renderDailyWeatherSummary(newSummaryData); // Render new data
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching daily summary:', error);
+                    document.getElementById('dailyWeatherSummary').innerHTML = `<p>Error fetching daily summary: ${error.message}</p>`;
+                });
+        }
+
+        // Render the daily weather summary
+        function renderDailyWeatherSummary(summaries) {
+            const summaryDiv = document.getElementById('dailyWeatherSummary');
+            // Update existing summaries or add new ones
+            for (const city in summaries) {
+                const summary = summaries[city];
+                let summaryElement = document.getElementById(`summary-${city}`);
+
+                if (summaryElement) {
+                    // Update existing summary
+                    summaryElement.innerHTML = `
+                        <strong>${summary.city}</strong><br>
+                        Avg Temp: ${summary.averageTemperature.toFixed(2)}°C<br>
+                        Max Temp: ${summary.maxTemperature.toFixed(2)}°C<br>
+                        Min Temp: ${summary.minTemperature.toFixed(2)}°C<br>
+                        Condition: ${summary.dominantWeatherCondition}
+                    `;
+                } else {
+                    // Create a new summary if it doesn't exist
+                    summaryElement = document.createElement('div');
+                    summaryElement.id = `summary-${city}`; // Unique ID for each city's summary
+                    summaryElement.className = 'summary';
+                    summaryElement.innerHTML = `
+                        <strong>${summary.city}</strong><br>
+                        Avg Temp: ${summary.averageTemperature.toFixed(2)}°C<br>
+                        Max Temp: ${summary.maxTemperature.toFixed(2)}°C<br>
+                        Min Temp: ${summary.minTemperature.toFixed(2)}°C<br>
+                        Condition: ${summary.dominantWeatherCondition}
+                    `;
+                    summaryDiv.appendChild(summaryElement); // Add the new summary to the div
+                }
+            }
+        }
+    </script>
+</body>
+</html>

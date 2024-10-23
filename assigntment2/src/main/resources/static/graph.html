@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max Temperature Summary</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #chartContainer {
+            width: 80%;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+           #summaryButton {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none; /* Remove underline */
+            font-size: 16px;
+        }
+        #summaryButton:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>Max Temperature Summary</h1>
+    <div id="chartContainer">
+        <canvas id="maxTempChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('maxTempChart').getContext('2d');
+
+        // Function to fetch max temperatures for each city
+        function fetchMaxTemperatureSummary() {
+            axios.get('http://localhost:8080/weather/summary/max-temp')
+                .then(response => {
+                    const data = response.data;
+
+                    const cities = [];  // City names
+                    const maxTemperatures = []; // Max temperatures
+
+                    // Loop through the response data to populate cities and max temperatures
+                    data.forEach(item => {
+                        cities.push(item.city);
+                        const maxTemp = Math.max(...item.maxTemperatures); // Get the max temperature for the city
+                        maxTemperatures.push(maxTemp); // Add to the max temperatures array
+                    });
+
+                    // Create the chart
+                    new Chart(ctx, {
+                        type: 'bar', // Bar chart type
+                        data: {
+                            labels: cities,
+                            datasets: [{
+                                label: 'Max Temperature (°C)',
+                                data: maxTemperatures,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Max Temperature (°C)'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Cities'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching max temperature summary:', error);
+                });
+        }
+
+        // Load data when the page loads
+        window.onload = function() {
+            fetchMaxTemperatureSummary();
+        };
+    </script>
+</body>
+</html>
