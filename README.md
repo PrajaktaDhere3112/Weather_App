@@ -37,3 +37,5 @@ http://localhost:8080/index.html
 ###Access the Database Open your web browser and navigate to:
 
 http://localhost:8080/h2-console/
+user name:root
+pass:123456
