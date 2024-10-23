@@ -27,8 +27,8 @@ To set up and run the application, you will need the following dependencies:
 
 1. **Clone the Repository**
    ```bash
-   git clone <repository-url>
-   cd assignment2
+   git clone https://github.com/PrajaktaDhere3112/Weather_App
+   
 
 ###Access the Application Open your web browser and navigate to:
 
